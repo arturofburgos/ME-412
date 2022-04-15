@@ -10,6 +10,8 @@
 #====================================#
 
 using PyPlot
+ion() # Interactive Output
+pygui(true) # Plot the PyPlot in Matplotlib window using the REPL in the VSCode
 
 # Create the 2D spatial grid
 
@@ -54,6 +56,7 @@ xlabel("x")
 ylabel("y")
 zlabel("z")
 title("Initial configuration of the sine wave")
+display(gcf())
 
 
 #= figcontour = figure()
@@ -68,7 +71,7 @@ v = 0.5
 
 # Create the time grid
 
-t_final = 4
+t_final = 1
 dt = 0.001
 t_domain = dt:dt:t_final
 
@@ -85,7 +88,7 @@ save = zeros(nx, ny, 4)
 #                                    #
 #====================================#
 # Attention, this code was developed for one scheme at a time, therefore if you want to see the result
-# for First Order Upwind, you will need to comment all the other schemes. Use ALT+SHIFT+A  to do it.
+# for First Order Upwind, you will need to comment all the other schemes. Use ALT+SHIFT+A to do it.
 
 
 println("Starting to perform the iterations...")
@@ -108,10 +111,7 @@ println("Starting to perform the iterations...")
             # Discretization of the equation
 
             c[i,j] = (cn[i,j] - (v*dt*(c_north-c_south))/dy - (u*dt*(c_east-c_west))/dx)
-            c[1,:] .= 0 # c = 0.0 at all edges
-            c[end,:] .= 0
-            c[:,1] .= 0
-            c[:,end] .= 0
+            
         end
     end
     
@@ -141,7 +141,7 @@ end  =#
 # Second Order Upwind Scheme #
 #============================#
 
-#= for t in t_domain
+for t in t_domain
     local cn = copy(c)
     for i in 3:nx-1
         for j in 3:ny-1
@@ -154,10 +154,7 @@ end  =#
             # Discretization of the equation
 
             c[i,j] = (cn[i,j] - (v*dt*(c_north-c_south))/dy - (u*dt*(c_east-c_west))/dx)
-            c[1,:] .= 0 # c = 0.0 at all edges
-            c[end,:] .= 0
-            c[:,1] .= 0
-            c[:,end] .= 0
+            
         end
     end
     
@@ -180,7 +177,7 @@ end  =#
     if t == 4
         save[:,:,4] = copy(c)
     end
-end  =#
+end 
 
 
 #==============#
@@ -200,10 +197,7 @@ end  =#
             # Discretization of the equation
 
             c[i,j] = (cn[i,j] - (v*dt*(c_north-c_south))/dy - (u*dt*(c_east-c_west))/dx)
-            c[1,:] .= 0 # c = 0.0 at all edges
-            c[end,:] .= 0
-            c[:,1] .= 0
-            c[:,end] .= 0 
+             
         end
     end
     
@@ -233,7 +227,7 @@ end  =#
 # UMIST Scheme #
 #==============#
 
-for t in t_domain
+#= for t in t_domain
     local cn = copy(c)
     for i in 3:nx-1
         for j in 3:ny-1
@@ -329,10 +323,7 @@ for t in t_domain
             # Discretization of the equation
 
             c[i,j] = (cn[i,j] - (v*dt*(c_north-c_south))/dy - (u*dt*(c_east-c_west))/dx)
-            c[1,:] .= 0 # c = 0.0 at all edges
-            c[end,:] .= 0
-            c[:,1] .= 0
-            c[:,end] .= 0
+            
         end
     end
     
@@ -355,7 +346,7 @@ for t in t_domain
     if t == 4
         save[:,:,4] = copy(c)
     end
-end 
+end  =#
 
 #====================================#
 #                                    #
@@ -370,6 +361,7 @@ xlabel("x")
 ylabel("y")
 zlabel("z")
 title("Configuration at 1 second of simulation")
+display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
 
 fig2 = figure()
 surf(x,y,save[:,:,2], cmap="viridis") # using PyPlot
@@ -377,6 +369,7 @@ xlabel("x")
 ylabel("y")
 zlabel("z")
 title("Configuration at 2 seconds of simulation")
+display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
 
 fig3 = figure()
 surf(x,y,save[:,:,3], cmap="viridis") # using PyPlot
@@ -384,11 +377,12 @@ xlabel("x")
 ylabel("y")
 zlabel("z")
 title("Configuration at 3 seconds of simulation")
+display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
 
 fig4 = figure()
-surf(x,y,save[:,:,4], cmap="viridis") # using PyPlot
+display(surf(x,y,save[:,:,4], cmap="viridis")) # using PyPlot
 xlabel("x")
 ylabel("y")
 zlabel("z")
 title("Configuration at 4 seconds of simulation")
-
+display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
