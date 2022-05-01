@@ -63,6 +63,13 @@ save_var_u = zeros(10001,51)
 save_var_v = zeros(10001,51)
 
 
+#====================================#
+#                                    #
+#       Discretization Scheme        #
+#                                    #
+#====================================#
+
+
 x = 0
 for ix = 1:nx
     if x < xlength
@@ -103,7 +110,7 @@ end
 
 
 fig1 = contour(save_var_u', fill = true)
-display(plot(fig1, title = "Contour Plot:  x $ny grid", titlefontsize = 11))
+display(plot(fig1, title = "Contour Plot:  $nx x $ny grid", titlefontsize = 11))
 
  
 
