@@ -69,7 +69,6 @@ save_var_v = zeros(10001,51)
 #                                    #
 #====================================#
 
-
 x = 0
 for ix = 1:nx
     if x < xlength
@@ -131,6 +130,6 @@ plot!(save_var_u[6000, 1:end-1], y, label = "0.6 m")
 plot!(save_var_u[7000, 1:end-1], y, label = "0.7 m")
 plot!(save_var_u[8000, 1:end-1], y, label = "0.8 m")
 plot!(save_var_u[9000, 1:end-1], y, label = "0.9 m")
-plot!(save_var_u[10000, 1:end-1], y, label = "1.0 m") =#
-
+plot!(save_var_u[10000, 1:end-1], y, label = "1.0 m")
+ =#
 #display(plot(y,save_var_u[1000, 1:end-1], title = "Profiles of u-velocity for dP/dx = $dpdx", label = "0.1 m", legend = :topleft))
