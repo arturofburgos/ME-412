@@ -17,7 +17,6 @@
 #============================================================#
 
 
-using Interpolations
 using Plots
 pyplot()
 
@@ -108,59 +107,80 @@ end
 #====================================#
 
 
-fig1 = contour(save_var_u, fill = true)
+# Contour Plot
+
+fig1 = contour(save_var_u', fill = true)
 display(plot(fig1, title = "Contour Plot:  $nx x $ny grid", titlefontsize = 11))
 
 
-display(plot(reverse(save_var_u[:,3])))
-
-
-
-
- 
-
 # Profiles v-velocity
-#= display(plot(save_var_v[2000, 1:end-1],y, title = "Profiles of v-velocity for dP/dx = $dpdx, at each designated x position", titlefontsize = 11,label = "0.2 m", legend = :topleft, xaxis = "v-velocity", yaxis = "y" ))
+
+display(plot(save_var_v[2000, 1:end-1],y, title = "Profiles of v-velocity for dP/dx = $dpdx, at each designated x position", titlefontsize = 11,label = "0.2 m", legend = :topleft, xaxis = "v-velocity", yaxis = "y" ))
 plot!(save_var_v[4000, 1:end-1], y, label = "0.4 m")
 plot!(save_var_v[6000, 1:end-1], y, label = "0.6 m")
-plot!(save_var_v[10000, 1:end-1], y, label = "1.0 m") =#
+plot!(save_var_v[10000, 1:end-1], y, label = "1.0 m")
 
 
-# Profiles u-vector equaly spaced CHECK WITH PROF VANKA IF THIS OR THE BOTTOM WAY
+# Profiles u-vector equaly spaced
+
 display(plot(save_var_u[1000, 1:end-1],y, title = "Profiles of u-velocity for dP/dx = $dpdx", label = "0.1 m", legend = :topleft))
 plot!(save_var_u[2000, 1:end-1], y, label = "0.2 m")
-#plot!(save_var_u[3000, 1:end-1], y, label = "0.3 m")
+plot!(save_var_u[3000, 1:end-1], y, label = "0.3 m")
 plot!(save_var_u[4000, 1:end-1], y, label = "0.4 m")
-#plot!(save_var_u[5000, 1:end-1], y, label = "0.5 m")
+plot!(save_var_u[5000, 1:end-1], y, label = "0.5 m")
 plot!(save_var_u[6000, 1:end-1], y, label = "0.6 m")
-#plot!(save_var_u[7000, 1:end-1], y, label = "0.7 m")
+plot!(save_var_u[7000, 1:end-1], y, label = "0.7 m")
 plot!(save_var_u[8000, 1:end-1], y, label = "0.8 m")
-#plot!(save_var_u[9000, 1:end-1], y, label = "0.9 m")
+plot!(save_var_u[9000, 1:end-1], y, label = "0.9 m")
 plot!(save_var_u[10000, 1:end-1], y, label = "1.0 m")
 
-#display(plot(y,save_var_u[1000, 1:end-1], title = "Profiles of u-velocity for dP/dx = $dpdx", label = "0.1 m", legend = :topleft))
+
+# First 0.99 value array, not used later, however this could be useful in the future
+
+fv = zeros(10000)
+fv[:] = findfirst.(x-> x>0.99,eachrow(save_var_u[1:end-1,:])) # first values
+display(plot(fv)) # Before interpolation
 
 
-#= qualquercoisa = Vector{10001}
-for i = 1:10001
-    idx = findfirst(x -> x>0.99, save_var_u[i,:])
-    qualquercoisa[i] = idx[0]
-end =#
+# Interpolate between the first value higher than 0.99 and the imediate ealier
 
-k1 = zeros(10000)
-k2 = zeros(10000)
-INTERPOL = zeros(10000)
+BL = zeros(10000) # Array to be stored the interpolation
 
-k1[:] = findfirst.(x-> x>0.99,eachrow(save_var_u[1:end-1,:]))
-k2[:] = k1.-1
-print(k2)
+for i=1:nx
+    for j=2:ny
+        if save_var_u[i,j]>=0.99
+            if save_var_u[i,j]>0.99
+
+                local a = save_var_u[i,j]-0.99
+                local b = 0.99-save_var_u[i,j-1]
+                BL[i] = (j-2)*dy + b*dy/(a+b)
+            
+            elseif save_var_u[i,j]==0.99
+            
+                BL[i] = (j-1)*dy  
+
+            end
+
+            break
+             
+        end
+    end
+end
 
 
-INTERPOL = LinearInterpolation(k1,k2)
+#====================================#
+#                                    #
+#         Blasius Solution           #
+#                                    #
+#====================================#
+# For dp/dx = 0 only, the comparison between Blasius Solution and Numerical Solution
 
-#INTERPOL = LinearInterpolation(findfirst.(x-> x>0.99,eachrow(save_var_u[1:end-1,:])),findfirst.(x-> x<0.99,eachrow(save_var_u[1:end-1,:])))
+
+X = 0:10000
+Blasius = (5.0 * sqrt.(X))/(sqrt((U_inlet)*(mu/rho)))/10000 # /10000 to make it in [mm]
 
 
-plot(INTERPOL,ylims=(0,50))
+# Plot comparison between Blasius Solution and Numerical Interplated Solution
 
-
+display(plot(X,Blasius,legend=:bottomright,title = "Comparison Numerical and Blasius solutions", label = "Blasius", xaxis = "nx, correspond to 1 m", yaxis = "δ, in mm" ))
+plot!(BL*1000, label="Numerical") # BL*1000 to make it in [mm]
