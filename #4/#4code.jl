@@ -110,12 +110,12 @@ end
 # Contour Plot
 
 fig1 = contour(save_var_u', fill = true)
-display(plot(fig1, title = "Contour Plot:  $nx x $ny grid", titlefontsize = 11))
+display(plot(fig1, title = "Contour Plot:  $nx x $ny grid", titlefontsize = 11 , xaxis = "nx, correspond to 1 m", yaxis = "δ, in mm"))
 
 
 # Profiles v-velocity
 
-display(plot(save_var_v[2000, 1:end-1],y, title = "Profiles of v-velocity for dP/dx = $dpdx, at each designated x position", titlefontsize = 11,label = "0.2 m", legend = :topleft, xaxis = "v-velocity", yaxis = "y" ))
+display(plot(save_var_v[2000, 1:end-1],y, title = "Profiles of v-velocity for dP/dx = $dpdx, at each designated x position", titlefontsize = 11,label = "0.2 m", legend = :topright, xaxis = "v-velocity [m/s]", yaxis = "y [m]" ))
 plot!(save_var_v[4000, 1:end-1], y, label = "0.4 m")
 plot!(save_var_v[6000, 1:end-1], y, label = "0.6 m")
 plot!(save_var_v[10000, 1:end-1], y, label = "1.0 m")
@@ -123,7 +123,7 @@ plot!(save_var_v[10000, 1:end-1], y, label = "1.0 m")
 
 # Profiles u-vector equaly spaced
 
-display(plot(save_var_u[1000, 1:end-1],y, title = "Profiles of u-velocity for dP/dx = $dpdx", label = "0.1 m", legend = :topleft))
+display(plot(save_var_u[1000, 1:end-1],y, title = "Profiles of u-velocity for dP/dx = $dpdx", label = "0.1 m", legend = :topleft, xaxis = "u-velocity [m/s]", yaxis = "y [m]"))
 plot!(save_var_u[2000, 1:end-1], y, label = "0.2 m")
 plot!(save_var_u[3000, 1:end-1], y, label = "0.3 m")
 plot!(save_var_u[4000, 1:end-1], y, label = "0.4 m")
@@ -182,5 +182,6 @@ Blasius = (5.0 * sqrt.(X))/(sqrt((U_inlet)*(mu/rho)))/10000 # /10000 to make it 
 
 # Plot comparison between Blasius Solution and Numerical Interplated Solution
 
-display(plot(X,Blasius,legend=:bottomright,title = "Comparison Numerical and Blasius solutions", label = "Blasius", xaxis = "nx, correspond to 1 m", yaxis = "δ, in mm" ))
+display(plot(X,Blasius,legend=:bottomright,title = "Comparison Numerical and Blasius solutions for dP/dx = 0", label = "Blasius", xaxis = "nx, correspond to 1 m", yaxis = "δ, in mm" ,titlefontsize = 11 ))
+display(plot(BL*1000,legend=:bottomright,title = "Boundary Layer Thickness for dP/dx = $dpdx", label = "Numerical", xaxis = "nx, correspond to 1 m", yaxis = "δ, in mm" ))
 plot!(BL*1000, label="Numerical") # BL*1000 to make it in [mm]
