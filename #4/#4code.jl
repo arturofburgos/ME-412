@@ -151,9 +151,9 @@ for i=1:nx
         if save_var_u[i,j]>=0.99
             if save_var_u[i,j]>0.99
 
-                local a = save_var_u[i,j]-0.99
-                local b = 0.99-save_var_u[i,j-1]
-                BL[i] = (j-2)*dy + b*dy/(a+b)
+                local d = save_var_u[i,j]-0.99
+                local e = 0.99-save_var_u[i,j-1]
+                BL[i] = (j-2)*dy + e*dy/(d+e)
             
             elseif save_var_u[i,j]==0.99
             
