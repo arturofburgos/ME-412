@@ -123,7 +123,7 @@ plot!(save_var_v[10000, 1:end-1], y, label = "1.0 m")
 
 # Profiles u-vector equaly spaced
 
-display(plot(save_var_u[1000, 1:end-1],y, title = "Profiles of u-velocity for dP/dx = $dpdx", label = "0.1 m", legend = :topleft, xaxis = "u-velocity [m/s]", yaxis = "y [m]"))
+display(plot(save_var_u[1000, 1:end-1],y, title = "U velocity vectors for dP/dx = $dpdx", label = "0.1 m", legend = :topleft, xaxis = "u-velocity [m/s]", yaxis = "y [m]"))
 plot!(save_var_u[2000, 1:end-1], y, label = "0.2 m")
 plot!(save_var_u[3000, 1:end-1], y, label = "0.3 m")
 plot!(save_var_u[4000, 1:end-1], y, label = "0.4 m")
