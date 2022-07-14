@@ -71,7 +71,7 @@ v = 0.5
 
 # Create the time grid
 
-t_final = 1
+t_final = 4
 dt = 0.001
 t_domain = dt:dt:t_final
 
