@@ -99,8 +99,9 @@ println("Starting to perform the iterations...")
 #===========================#
 # First Order Upwind Scheme #
 #===========================#
-
-#= for t in t_domain
+# New Progress Method
+prog = Progress(round(Int,t_final/dt)+1)
+for t in t_domain
     local cn = copy(c)
     for i in 2:nx-1
         for j in 2:ny-1
@@ -117,33 +118,22 @@ println("Starting to perform the iterations...")
         end
     end
     
-    if round(t/dt) % 100 == 0
-        println("timestep: ", round(t/dt))
+    next!(prog)   
+
+    if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
+
+        save[:,:,Int(t)] = copy(c)
+
     end
 
-    if t == 1
-        save[:,:,1] = copy(c)
-    end
-    
-    if t == 2
-        save[:,:,2] = copy(c)
-    end
-    
-    if t == 3
-        save[:,:,3] = copy(c)
-    end
-    
-    if t == 4
-        save[:,:,4] = copy(c)
-    end
-end  =#
+end 
 
 
 #============================#
 # Second Order Upwind Scheme #
 #============================#
 # New Progress Method
-prog = Progress(round(Int,t_final/dt)+1)
+#= prog = Progress(round(Int,t_final/dt)+1)
 for t in t_domain
     local cn = copy(c) # YOU CAN DELETE THE LOCAL WORD THIS IS COOL
     for i in 3:nx-1
@@ -161,30 +151,23 @@ for t in t_domain
         end
     end
 
-
     next!(prog)   
 
-    if t == 1
-        save[:,:,1] = copy(c)
+    if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
+
+        save[:,:,Int(t)] = copy(c)
+
     end
-    
-    if t == 2
-        save[:,:,2] = copy(c)
-    end
-    
-    if t == 3
-        save[:,:,3] = copy(c)
-    end
-    
-    if t == 4
-        save[:,:,4] = copy(c)
-    end
-end 
+
+   
+end =# 
 
 
 #==============#
 # Quick Scheme #
 #==============#
+# New Progress Method
+prog = Progress(round(Int,t_final/dt)+1)
 
 #= for t in t_domain
     local cn = copy(c)
@@ -203,31 +186,22 @@ end
         end
     end
     
-    if round(t/dt) % 100 == 0
-        println("timestep: ", round(t/dt))
+    next!(prog)   
+
+    if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
+
+        save[:,:,Int(t)] = copy(c)
+
     end
 
-    if t == 1
-        save[:,:,1] = copy(c)
-    end
-    
-    if t == 2
-        save[:,:,2] = copy(c)
-    end
-    
-    if t == 3
-        save[:,:,3] = copy(c)
-    end
-    
-    if t == 4
-        save[:,:,4] = copy(c)
-    end
 end  =#
 
 
 #==============#
 # UMIST Scheme #
 #==============#
+# New Progress Method
+prog = Progress(round(Int,t_final/dt)+1)
 
 #= for t in t_domain
     local cn = copy(c)
@@ -329,25 +303,14 @@ end  =#
         end
     end
     
-    if round(t/dt) % 100 == 0
-        println("timestep: ", round(t/dt))
+    next!(prog)   
+
+    if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
+
+        save[:,:,Int(t)] = copy(c)
+
     end
 
-    if t == 1
-        save[:,:,1] = copy(c)
-    end
-    
-    if t == 2
-        save[:,:,2] = copy(c)
-    end
-    
-    if t == 3
-        save[:,:,3] = copy(c)
-    end
-    
-    if t == 4
-        save[:,:,4] = copy(c)
-    end
 end  =#
 
 #====================================#
@@ -356,39 +319,21 @@ end  =#
 #                                    #
 #====================================#
 
+function plot_figures()
 
-fig1 = figure()
-surf(x,y,save[:,:,1], cmap="viridis") # using PyPlot
-xlabel("x")
-ylabel("y")
-zlabel("z")
-title("Configuration at 1 second of simulation")
-display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
+    for i =1:t_final
+        figure()
+        surf(x,y,save[:,:,i], cmap="viridis")
+        xlabel("x")
+        ylabel("y")
+        zlabel("z")
+        title("Configuration at $i seconds of simulation")
+        zlim([0.0,1.0])
+        display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
+    end
 
-fig2 = figure()
-surf(x,y,save[:,:,2], cmap="viridis") # using PyPlot
-xlabel("x")
-ylabel("y")
-zlabel("z")
-title("Configuration at 2 seconds of simulation")
-display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
+end
 
-fig3 = figure()
-surf(x,y,save[:,:,3], cmap="viridis") # using PyPlot
-xlabel("x")
-ylabel("y")
-zlabel("z")
-title("Configuration at 3 seconds of simulation")
-display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
-
-fig4 = figure()
-display(surf(x,y,save[:,:,4], cmap="viridis")) # using PyPlot
-xlabel("x")
-ylabel("y")
-zlabel("z")
-title("Configuration at 4 seconds of simulation")
-display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
+plot_figures()
 
 
-
-#function save_info()
