@@ -9,12 +9,11 @@
 #                                    #
 #====================================#
 
+using ProgressMeter
 using PyPlot
 ion() # Interactive Output
-pygui(true) # Plot the PyPlot in Matplotlib window using the REPL in the VSCode
+pygui(false) # Plot the PyPlot in Matplotlib window using the REPL in the VSCode
 
-
-using ProgressMeter
 # Create the 2D spatial grid
 
 println("Setting up the spatial grid...")
@@ -53,11 +52,12 @@ end
 # Plot the initial configuration 
 
 figinit = figure()
-surf(x,y,c, cmap="viridis") # using PyPlot
+s=surf(x,y,c, cmap="viridis") # using PyPlot
 xlabel("x")
 ylabel("y")
 zlabel("z")
 title("Initial configuration of the sine wave")
+colorbar(s)
 display(gcf())
 
 
@@ -80,8 +80,7 @@ t_domain = dt:dt:t_final
 
 # Initialize save variables to store the values at needed timestep
 
-save = zeros(nx, ny, 4)
-
+save = zeros(nx, ny, t_final)
 
 
 #====================================#
@@ -89,229 +88,246 @@ save = zeros(nx, ny, 4)
 #             Schemes                #
 #                                    #
 #====================================#
-# Attention, this code was developed for one scheme at a time, therefore if you want to see the result
-# for First Order Upwind, you will need to comment all the other schemes. Use ALT+SHIFT+A to do it.
-
-
-println("Starting to perform the iterations...")
 
 
 #===========================#
 # First Order Upwind Scheme #
 #===========================#
-# New Progress Method
-prog = Progress(round(Int,t_final/dt)+1)
-for t in t_domain
-    local cn = copy(c)
-    for i in 2:nx-1
-        for j in 2:ny-1
-            c_north = cn[i,j]
-            c_east = cn[i,j]
-            c_south = cn[i,j-1]
-            c_west = cn[i-1,j]
+# New Progress Method using ProgressMeter
+function FOUS(quantity, time_domain, save_var)
+    prog = Progress(round(Int,t_final/dt)+1)
+    for t in time_domain
+        quantityn = copy(quantity)
+        for i in 2:nx-1
+            for j in 2:ny-1
+                quantity_north = quantityn[i,j]
+                quantity_east = quantityn[i,j]
+                quantity_south = quantityn[i,j-1]
+                quantity_west = quantityn[i-1,j]
 
 
-            # Discretization of the equation
+                # Discretization of the equation
 
-            c[i,j] = (cn[i,j] - (v*dt*(c_north-c_south))/dy - (u*dt*(c_east-c_west))/dx)
+                quantity[i,j] = (quantityn[i,j] - (v*dt*(quantity_north-quantity_south))/dy - (u*dt*(quantity_east-quantity_west))/dx)
             
+            end
         end
-    end
     
-    next!(prog)   
+        next!(prog)   
 
-    if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
+        if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
 
-        save[:,:,Int(t)] = copy(c)
+            save_var[:,:,Int(t)] = copy(quantity) # Note that we do not need to return any value since we are changing the local biding of the save_var array, therefore it will be change in the global scope
 
-    end
+        end
 
-end 
+    end 
+    
+end
 
 
 #============================#
 # Second Order Upwind Scheme #
 #============================#
-# New Progress Method
-#= prog = Progress(round(Int,t_final/dt)+1)
-for t in t_domain
-    local cn = copy(c) # YOU CAN DELETE THE LOCAL WORD THIS IS COOL
-    for i in 3:nx-1
-        for j in 3:ny-1
-            c_north = (3/2)*cn[i,j] - (1/2)*cn[i,j-1]
-            c_east = (3/2)*cn[i,j] - (1/2)*cn[i-1,j]
-            c_south = (3/2)*cn[i,j-1] - (1/2)*cn[i,j-2]
-            c_west = (3/2)*cn[i-1,j] - (1/2)*cn[i-2,j]
+# New Progress Method using ProgressMeter
+function SOUS(quantity, time_domain, save_var)
+    prog = Progress(round(Int,t_final/dt)+1)
+    for t in time_domain
+        local quantityn = copy(quantity) # YOU CAN DELETE THE LOCAL WORD THIS IS COOL
+        for i in 3:nx-1
+            for j in 3:ny-1
+                quantity_north = (3/2)*quantityn[i,j] - (1/2)*quantityn[i,j-1]
+                quantity_east = (3/2)*quantityn[i,j] - (1/2)*quantityn[i-1,j]
+                quantity_south = (3/2)*quantityn[i,j-1] - (1/2)*quantityn[i,j-2]
+                quantity_west = (3/2)*quantityn[i-1,j] - (1/2)*quantityn[i-2,j]
 
 
-            # Discretization of the equation
+                # Discretization of the equation
 
-            c[i,j] = (cn[i,j] - (v*dt*(c_north-c_south))/dy - (u*dt*(c_east-c_west))/dx)
-            
+                quantity[i,j] = (quantityn[i,j] - (v*dt*(quantity_north-quantity_south))/dy - (u*dt*(quantity_east-quantity_west))/dx)
+
+            end
         end
+
+         next!(prog)   
+
+        if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
+
+            save_var[:,:,Int(t)] = copy(quantity)
+
+        end
+
+    
     end
-
-    next!(prog)   
-
-    if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
-
-        save[:,:,Int(t)] = copy(c)
-
-    end
-
-   
-end =# 
+end
 
 
 #==============#
 # Quick Scheme #
 #==============#
-# New Progress Method
-prog = Progress(round(Int,t_final/dt)+1)
+# New Progress Method using ProgressMeter
+function Quick(quantity, time_domain, save_var)
+    prog = Progress(round(Int,t_final/dt)+1)
+    for t in time_domain
+        local quantityn = copy(quantity)
+        for i in 3:nx-1
+            for j in 3:ny-1
+                quantity_north = quantityn[i,j] + (3*quantityn[i,j+1]- 2*quantityn[i,j]-quantityn[i,j-1])/8
+                quantity_east = quantityn[i,j] + (3*quantityn[i+1,j]- 2*quantityn[i,j]-quantityn[i-1,j])/8
+                quantity_south = quantityn[i,j-1] + (3*quantityn[i,j]- 2*quantityn[i,j-1]-quantityn[i,j-2])/8
+                quantity_west = quantityn[i-1,j] + (3*quantityn[i,j]- 2*quantityn[i-1,j]-quantityn[i-2,j])/8
 
-#= for t in t_domain
-    local cn = copy(c)
-    for i in 3:nx-1
-        for j in 3:ny-1
-            c_north = cn[i,j] + (3*cn[i,j+1]- 2*cn[i,j]-cn[i,j-1])/8
-            c_east = cn[i,j] + (3*cn[i+1,j]- 2*cn[i,j]-cn[i-1,j])/8
-            c_south = cn[i,j-1] + (3*cn[i,j]- 2*cn[i,j-1]-cn[i,j-2])/8
-            c_west = cn[i-1,j] + (3*cn[i,j]- 2*cn[i-1,j]-cn[i-2,j])/8
 
+                # Discretization of the equation
 
-            # Discretization of the equation
+                quantity[i,j] = (quantityn[i,j] - (v*dt*(quantity_north-quantity_south))/dy - (u*dt*(quantity_east-quantity_west))/dx)
 
-            c[i,j] = (cn[i,j] - (v*dt*(c_north-c_south))/dy - (u*dt*(c_east-c_west))/dx)
-             
+            end
         end
+
+        next!(prog)   
+
+        if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
+
+            save_var[:,:,Int(t)] = copy(quantity)
+
+        end
+
     end
-    
-    next!(prog)   
-
-    if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
-
-        save[:,:,Int(t)] = copy(c)
-
-    end
-
-end  =#
-
+end
+ 
 
 #==============#
 # UMIST Scheme #
 #==============#
-# New Progress Method
-prog = Progress(round(Int,t_final/dt)+1)
+# New Progress Method using ProgressMeter
+function UMIST(quantity, time_domain, save_var)
+    prog = Progress(round(Int,t_final/dt)+1)
+    for t in time_domain
+        local quantityn = copy(quantity)
+        for i in 3:nx-1
+            for j in 3:ny-1
 
-#= for t in t_domain
-    local cn = copy(c)
-    for i in 3:nx-1
-        for j in 3:ny-1
 
+                # For North
 
-            # For North
+                if (quantityn[i,j+1]-quantity[i,j]) == 0
+                    quantity_north = quantityn[i,j]
+                else
+                    rn = (quantityn[i,j]-quantityn[i,j-1])/(quantityn[i,j+1]-quantity[i,j])
+                    psi_n_1 = 2*rn
+                    psi_n_2 = (1+3*rn)/4
+                    psi_n_3 = (3+rn)/4
+                    psi_n_4 = 2
 
-            if (cn[i,j+1]-c[i,j]) == 0
-                c_north = cn[i,j]
-            else
-                rn = (cn[i,j]-cn[i,j-1])/(cn[i,j+1]-c[i,j])
-                psi_n_1 = 2*rn
-                psi_n_2 = (1+3*rn)/4
-                psi_n_3 = (3+rn)/4
-                psi_n_4 = 2
+                    min_n = min(psi_n_1,psi_n_2,psi_n_3,psi_n_4)
 
-                min_n = min(psi_n_1,psi_n_2,psi_n_3,psi_n_4)
+                    if min_n < 0
+                        min_n = 0
+                    end
 
-                if min_n < 0
-                    min_n = 0
+                    quantity_north = quantityn[i,j] + min_n/2 * (quantity[i,j+1]-quantity[i,j])
                 end
 
-                c_north = cn[i,j] + min_n/2 * (c[i,j+1]-c[i,j])
-            end
 
-            
-            # For East
+                # For East
 
-            if (cn[i+1,j]-c[i,j]) == 0
-                c_east = cn[i,j]
-            else
-                re = (cn[i,j]-cn[i-1,j])/(cn[i+1,j]-c[i,j])
-                psi_e_1 = 2*re
-                psi_e_2 = (1+3*re)/4
-                psi_e_3 = (3+re)/4
-                psi_e_4 = 2
+                if (quantityn[i+1,j]-quantity[i,j]) == 0
+                    quantity_east = quantityn[i,j]
+                else
+                    re = (quantityn[i,j]-quantityn[i-1,j])/(quantityn[i+1,j]-quantity[i,j])
+                    psi_e_1 = 2*re
+                    psi_e_2 = (1+3*re)/4
+                    psi_e_3 = (3+re)/4
+                    psi_e_4 = 2
 
-                min_e = min(psi_e_1,psi_e_2,psi_e_3,psi_e_4)
+                    min_e = min(psi_e_1,psi_e_2,psi_e_3,psi_e_4)
 
-                if min_e < 0
-                    min_e = 0
-                end
-            
-                c_east = cn[i,j] + min_e/2 * (c[i+1,j]-c[i,j])
-            end
-
-
-            # For South
-            
-            if (cn[i,j]-c[i,j-1]) == 0
-                c_south = cn[i,j-1]
-            else
-                rs = (cn[i,j-1]-cn[i,j-2])/(cn[i,j]-c[i,j-1])
-                psi_s_1 = 2*rs
-                psi_s_2 = (1+3*rs)/4
-                psi_s_3 = (3+rs)/4
-                psi_s_4 = 2
-
-                min_s = min(psi_s_1,psi_s_2,psi_s_3,psi_s_4)
-
-                if min_s < 0
-                    min_s = 0
+                    if min_e < 0
+                        min_e = 0
+                    end
+                
+                    quantity_east = quantityn[i,j] + min_e/2 * (quantity[i+1,j]-quantity[i,j])
                 end
 
-                c_south = cn[i,j-1] + min_s/2 * (c[i,j]-c[i,j-1])
-            end
 
+                # For South
 
-            # For West
+                if (quantityn[i,j]-quantity[i,j-1]) == 0
+                    quantity_south = quantityn[i,j-1]
+                else
+                    rs = (quantityn[i,j-1]-quantityn[i,j-2])/(quantityn[i,j]-quantity[i,j-1])
+                    psi_s_1 = 2*rs
+                    psi_s_2 = (1+3*rs)/4
+                    psi_s_3 = (3+rs)/4
+                    psi_s_4 = 2
 
-            if (cn[i,j]-c[i-1,j]) == 0
+                    min_s = min(psi_s_1,psi_s_2,psi_s_3,psi_s_4)
 
-                c_west = cn[i-1,j]
+                    if min_s < 0
+                        min_s = 0
+                    end
 
-            else
-                rw = (cn[i-1,j]-cn[i-2,j])/(cn[i,j]-c[i-1,j])
-                psi_w_1 = 2*rw
-                psi_w_2 = (1+3*rw)/4
-                psi_w_3 = (3+rw)/4
-                psi_w_4 = 2
-
-
-                min_w = min(psi_w_1,psi_w_2,psi_w_3,psi_w_4)
-
-                if min_w < 0
-                    min_w = 0
+                    quantity_south = quantityn[i,j-1] + min_s/2 * (quantity[i,j]-quantity[i,j-1])
                 end
 
-                c_west = cn[i-1,j] + min_w/2 * (cn[i,j]-cn[i-1,j])
+
+                # For West
+
+                if (quantityn[i,j]-quantity[i-1,j]) == 0
+
+                    quantity_west = quantityn[i-1,j]
+
+                else
+                    rw = (quantityn[i-1,j]-quantityn[i-2,j])/(quantityn[i,j]-quantity[i-1,j])
+                    psi_w_1 = 2*rw
+                    psi_w_2 = (1+3*rw)/4
+                    psi_w_3 = (3+rw)/4
+                    psi_w_4 = 2
+
+
+                    min_w = min(psi_w_1,psi_w_2,psi_w_3,psi_w_4)
+
+                    if min_w < 0
+                        min_w = 0
+                    end
+
+                    quantity_west = quantityn[i-1,j] + min_w/2 * (quantityn[i,j]-quantityn[i-1,j])
+                end
+
+
+                # Discretization of the equation
+
+                quantity[i,j] = (quantityn[i,j] - (v*dt*(quantity_north-quantity_south))/dy - (u*dt*(quantity_east-quantity_west))/dx)
+
             end
-
-
-            # Discretization of the equation
-
-            c[i,j] = (cn[i,j] - (v*dt*(c_north-c_south))/dy - (u*dt*(c_east-c_west))/dx)
-            
         end
+
+        next!(prog)   
+
+        if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
+
+            save_var[:,:,Int(t)] = copy(quantity)
+
+        end
+
     end
-    
-    next!(prog)   
+end
 
-    if t % 1 == 0 # Nice way to define an Integer, therefore we can save at each second of iteration
 
-        save[:,:,Int(t)] = copy(c)
+#====================================#
+#                                    #
+#          Function Call             #
+#                                    #
+#====================================#
 
-    end
+println("Starting to perform the iterations...")
 
-end  =#
+#FOUS(c,t_domain,save)
+#SOUS(c,t_domain,save)
+#Quick(c,t_domain,save)
+UMIST(c,t_domain,save)
+
 
 #====================================#
 #                                    #
@@ -319,21 +335,20 @@ end  =#
 #                                    #
 #====================================#
 
-function plot_figures()
+function plot_figures(save_var)
 
     for i =1:t_final
         figure()
-        surf(x,y,save[:,:,i], cmap="viridis")
+        surf_plot = surf(x,y,save_var[:,:,i], cmap="viridis")
         xlabel("x")
         ylabel("y")
         zlabel("z")
         title("Configuration at $i seconds of simulation")
-        zlim([0.0,1.0])
+        #zlim([0.0,1.0])
+        colorbar(surf_plot)
         display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
     end
 
 end
 
-plot_figures()
-
-
+plot_figures(save)
