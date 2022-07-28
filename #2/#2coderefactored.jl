@@ -134,7 +134,7 @@ end
 function SOUS(quantity, time_domain, save_var)
     prog = Progress(round(Int,t_final/dt)+1)
     for t in time_domain
-        local quantityn = copy(quantity) # YOU CAN DELETE THE LOCAL WORD THIS IS COOL
+        local quantityn = copy(quantity) # YOU CAN DELETE THE "LOCAL" WORD, THE SCOPE INSIDE THE FUNCTION IS ALREADY LOCAL --> SEE PREVIOUS SCHEME
         for i in 3:nx-1
             for j in 3:ny-1
                 quantity_north = (3/2)*quantityn[i,j] - (1/2)*quantityn[i,j-1]
@@ -170,7 +170,7 @@ end
 function Quick(quantity, time_domain, save_var)
     prog = Progress(round(Int,t_final/dt)+1)
     for t in time_domain
-        local quantityn = copy(quantity)
+        local quantityn = copy(quantity) # IDEM
         for i in 3:nx-1
             for j in 3:ny-1
                 quantity_north = quantityn[i,j] + (3*quantityn[i,j+1]- 2*quantityn[i,j]-quantityn[i,j-1])/8
@@ -205,7 +205,7 @@ end
 function UMIST(quantity, time_domain, save_var)
     prog = Progress(round(Int,t_final/dt)+1)
     for t in time_domain
-        local quantityn = copy(quantity)
+        local quantityn = copy(quantity) # IDEM
         for i in 3:nx-1
             for j in 3:ny-1
 
