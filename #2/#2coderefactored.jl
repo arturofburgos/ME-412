@@ -12,7 +12,7 @@
 using ProgressMeter
 using PyPlot
 ion() # Interactive Output
-pygui(false) # Plot the PyPlot in Matplotlib window using the REPL in the VSCode
+pygui(true) # Plot the PyPlot in Matplotlib window using the REPL in the VSCode, either true or false
 
 # Create the 2D spatial grid
 
@@ -56,6 +56,7 @@ s=surf(x,y,c, cmap="viridis") # using PyPlot
 xlabel("x")
 ylabel("y")
 zlabel("z")
+zlim([-0.8,1.3])
 title("Initial configuration of the sine wave")
 colorbar(s)
 display(gcf())
@@ -324,9 +325,9 @@ end
 println("Starting to perform the iterations...")
 
 #FOUS(c,t_domain,save)
-#SOUS(c,t_domain,save)
+SOUS(c,t_domain,save)
 #Quick(c,t_domain,save)
-UMIST(c,t_domain,save)
+#UMIST(c,t_domain,save)
 
 
 #====================================#
@@ -344,7 +345,7 @@ function plot_figures(save_var)
         ylabel("y")
         zlabel("z")
         title("Configuration at $i seconds of simulation")
-        #zlim([0.0,1.0])
+        zlim([-0.8,1.3])
         colorbar(surf_plot)
         display(gcf()) # Plot the PyPlot in VSCode window window using the REPL in the VSCode
     end
